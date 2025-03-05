@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ref, get } from 'firebase/database';
-import { database } from '../firebase';  // Assure-toi que le chemin vers le fichier firebase.js est correct
+import { database } from '../firebase';
 
 const UserProfilePage = () => {
-  const { userId } = useParams();  // Récupérer l'ID de l'utilisateur depuis l'URL
-  const [userName, setUserName] = useState(null);  // Variable d'état pour stocker le nom de l'utilisateur
-  const [programs, setPrograms] = useState(null);  // Pour stocker les programmes de l'utilisateur
+  const { userId } = useParams();
+  const [userName, setUserName] = useState(null);
+  const [programs, setPrograms] = useState(null); // Ajouter l'état pour stocker les programmes
 
-  // Effectuer la récupération des données lorsque l'ID de l'utilisateur change
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userRef = ref(database, 'users/' + userId);  // Référence à l'utilisateur dans Firebase
-        const snapshot = await get(userRef);  // Récupérer les données de l'utilisateur
+        const userRef = ref(database, 'users/' + userId);
+        const snapshot = await get(userRef);
         if (snapshot.exists()) {
-          const userData = snapshot.val();
-          setUserName(userData.name);  // Stocker le nom de l'utilisateur dans l'état
-          setPrograms(userData.programs);  // Stocker les programmes dans l'état
+          setUserName(snapshot.val().name);
+          setPrograms(snapshot.val().programs); // Récupérer les programmes
         } else {
           console.log('Aucun utilisateur trouvé');
         }
@@ -27,42 +25,33 @@ const UserProfilePage = () => {
     };
 
     fetchUserData();
-  }, [userId]);  // Déclenche la récupération des données lorsque l'ID de l'utilisateur change
+  }, [userId]);
 
   return (
     <div>
       {userName ? (
-        <h1>Bonjour, {userName}!</h1>  // Afficher le nom de l'utilisateur
-      ) : (
-        <p>Chargement...</p>  // Afficher "Chargement..." jusqu'à ce que les données soient récupérées
-      )}
-
-      {programs ? (
         <div>
+          <h1>Bonjour, {userName}!</h1>
           <h2>Programmes de {userName}</h2>
-          <p><strong>Haut du corps :</strong></p>
-          {programs.upperBody?.exercises.map((exercise, index) => (
-            <p key={index}>
-              {exercise.name} - {exercise.repetitions} répétitions à {exercise.weight} kg
-            </p>
-          ))}
-
-          <p><strong>Bas du corps :</strong></p>
-          {programs.lowerBody?.exercises.map((exercise, index) => (
-            <p key={index}>
-              {exercise.name} - {exercise.repetitions} répétitions à {exercise.weight} kg
-            </p>
-          ))}
-
-          <p><strong>Cardio :</strong></p>
-          {programs.cardio?.exercises.map((exercise, index) => (
-            <p key={index}>
-              {exercise.name} - {exercise.duration}
-            </p>
-          ))}
+          {programs ? (
+            <div>
+              <ul>
+                {/* Affichage des programmes comme liens cliquables */}
+                {Object.keys(programs).map((programKey) => (
+                  <li key={programKey}>
+                    <Link to={`/user/${userId}/program/${programKey}`}>
+                      {programs[programKey].name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p>Chargement des programmes...</p>
+          )}
         </div>
       ) : (
-        <p>Chargement des programmes...</p>  // Afficher "Chargement des programmes..." jusqu'à ce que les programmes soient récupérés
+        <p>Chargement...</p>
       )}
     </div>
   );
