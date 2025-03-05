@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajouter des utilisateurs avec Firebase</title>
+</head>
+<body>
+  <h1>Ajouter des utilisateurs et leurs exercices</h1>
+
+  <script type="module">
+    // Import des bibliothèques Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDeOXmNFQTZyT4Lh-qsCrld2FeiBQUTgpA",
+      authDomain: "salle-c5e02.firebaseapp.com",
+      databaseURL: "https://salle-c5e02-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "salle-c5e02",
+      storageBucket: "salle-c5e02.firebasestorage.app",
+      messagingSenderId: "770935296880",
+      appId: "1:770935296880:web:15da9739667af3f85475b5",
+      measurementId: "G-TK4HCP2ZBH"
+    };
+
+    // Initialisation de Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Fonction pour ajouter les utilisateurs et leurs exercices
+    function addUsersData() {
+      // Données de Martin
+      set(ref(db, 'users/martin'), {
+        exercises: {
+          1: { name: "Squat", repetitions: 12, weight: 80 },
+          2: { name: "Bench Press", repetitions: 10, weight: 60 },
+          3: { name: "Deadlift", repetitions: 8, weight: 100 }
+        }
+      });
+
+      // Données d'Olivia
+      set(ref(db, 'users/olivia'), {
+        exercises: {
+          1: { name: "Squat", repetitions: 10, weight: 60 },
+          2: { name: "Pull-ups", repetitions: 8, weight: 0 },
+          3: { name: "Overhead Press", repetitions: 12, weight: 40 }
+        }
+      });
+
+      console.log("Données ajoutées pour Martin et Olivia !");
+    }
+
+    // Appel de la fonction pour ajouter les utilisateurs et leurs exercices
+    addUsersData();
+  </script>
+</body>
+</html>
