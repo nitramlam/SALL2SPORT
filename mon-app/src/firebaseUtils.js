@@ -15,25 +15,25 @@ const createUser = async (userName) => {
       upperBody: {
         name: "Haut du corps",
         exercises: [
-          { name: "Développé couché", repetitions: 12, weight: 50 },
-          { name: "Tractions", repetitions: 10, weight: 0 },
-          { name: "Développé militaire", repetitions: 12, weight: 30 },
+          { name: "Développé couché", repetitions: null, weight: null, goalWeight: null, duration: null },
+          { name: "Tractions", repetitions: null, weight: null, goalWeight: null, duration: null },
+          { name: "Développé militaire", repetitions: null, weight: null, goalWeight: null, duration: null },
         ],
       },
       lowerBody: {
         name: "Bas du corps",
         exercises: [
-          { name: "Squat", repetitions: 12, weight: 60 },
-          { name: "Fentes", repetitions: 12, weight: 20 },
-          { name: "Leg curl", repetitions: 12, weight: 25 },
+          { name: "Squat", repetitions: null, weight: null, goalWeight: null, duration: null },
+          { name: "Fentes", repetitions: null, weight: null, goalWeight: null, duration: null },
+          { name: "Leg curl", repetitions: null, weight: null, goalWeight: null, duration: null },
         ],
       },
       cardio: {
         name: "Cardio",
         exercises: [
-          { name: "Running", duration: "30 min" },
-          { name: "Vélo", duration: "30 min" },
-          { name: "Rameur", duration: "20 min" },
+          { name: "Running", repetitions: null, weight: null, goalWeight: null, duration: null },
+          { name: "Vélo", repetitions: null, weight: null, goalWeight: null, duration: null },
+          { name: "Rameur", repetitions: null, weight: null, goalWeight: null, duration: null },
         ],
       },
     },
