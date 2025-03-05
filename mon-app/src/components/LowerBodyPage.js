@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ref, get, update } from 'firebase/database';
+import { ref, get, update, remove } from 'firebase/database';
 import { database } from '../firebase';
 
 const LowerBodyPage = () => {
@@ -65,6 +65,37 @@ const LowerBodyPage = () => {
     }
   };
 
+  // Fonction pour ajouter un nouvel exercice
+  const addExercise = () => {
+    const newExercise = {
+      name: '',
+      repetitions: 0,
+      weight: 0,
+      goalWeight: 0,
+      duration: 0,
+    };
+    const updatedExercises = [...exercises, newExercise];
+    setExercises(updatedExercises);
+
+    // Mettre à jour Firebase avec le nouvel exercice
+    const userRef = ref(database, 'users/' + userId);
+    update(userRef, {
+      'programs/lowerBody/exercises': updatedExercises,
+    });
+  };
+
+  // Fonction pour supprimer un exercice
+  const removeExercise = (index) => {
+    const updatedExercises = exercises.filter((_, i) => i !== index);
+    setExercises(updatedExercises);
+
+    // Mettre à jour Firebase après suppression de l'exercice
+    const userRef = ref(database, 'users/' + userId);
+    update(userRef, {
+      'programs/lowerBody/exercises': updatedExercises,
+    });
+  };
+
   return (
     <div>
       {userName ? <h1>Bonjour, {userName}!</h1> : <p>Chargement...</p>}
@@ -79,6 +110,7 @@ const LowerBodyPage = () => {
                 <th>Poids (kg)</th>
                 <th>Objectif Poids (kg)</th>
                 <th>Durée (sec)</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -132,10 +164,14 @@ const LowerBodyPage = () => {
                     />
                     <button onClick={() => handleIncrement(index, 'duration')}>+</button>
                   </td>
+                  <td>
+                    <button onClick={() => removeExercise(index)}>Supprimer</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          <button onClick={addExercise}>Ajouter un exercice</button>
         </div>
       ) : (
         <p>Chargement des exercices...</p>

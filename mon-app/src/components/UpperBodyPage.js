@@ -1,36 +1,38 @@
-// UpperBodyPage.js
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ref, get, update } from 'firebase/database';
+import { ref, get, update, remove } from 'firebase/database';
 import { database } from '../firebase';
 
 const UpperBodyPage = () => {
-  const { userId } = useParams();
-  const [userName, setUserName] = useState(null);
-  const [exercises, setExercises] = useState(null);
+  const { userId } = useParams();  // Récupérer l'ID de l'utilisateur depuis l'URL
+  const [userName, setUserName] = useState(null);  // Variable d'état pour stocker le nom de l'utilisateur
+  const [exercises, setExercises] = useState(null);  // Variable d'état pour stocker les exercices du programme haut du corps
 
+  // Effectuer la récupération des données lorsque l'ID de l'utilisateur change
   useEffect(() => {
     const fetchProgramData = async () => {
       try {
-        const userRef = ref(database, 'users/' + userId);
-        const snapshot = await get(userRef);
+        const userRef = ref(database, 'users/' + userId);  // Référence à l'utilisateur dans Firebase
+        const snapshot = await get(userRef);  // Récupérer les données de l'utilisateur
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          setUserName(userData.name);
-          setExercises(userData.programs.upperBody.exercises);
+          setUserName(userData.name);  // Stocker le nom de l'utilisateur
+          setExercises(userData.programs.upperBody.exercises); // Stocker les exercices du haut du corps
         }
       } catch (error) {
         console.error('Erreur de récupération des données:', error);
       }
     };
+
     fetchProgramData();
-  }, [userId]);
+  }, [userId]);  // Déclenche la récupération des données lorsque l'ID de l'utilisateur change
 
   const handleChange = (index, field, value) => {
     const updatedExercises = [...exercises];
     updatedExercises[index][field] = value;
     setExercises(updatedExercises);
 
+    // Mettre à jour les données dans Firebase
     const userRef = ref(database, 'users/' + userId);
     update(userRef, {
       ['programs/upperBody/exercises/' + index + '/' + field]: value,
@@ -42,6 +44,7 @@ const UpperBodyPage = () => {
     updatedExercises[index][field] = updatedExercises[index][field] ? updatedExercises[index][field] + 1 : 1;
     setExercises(updatedExercises);
 
+    // Mettre à jour les données dans Firebase
     const userRef = ref(database, 'users/' + userId);
     update(userRef, {
       ['programs/upperBody/exercises/' + index + '/' + field]: updatedExercises[index][field],
@@ -54,11 +57,43 @@ const UpperBodyPage = () => {
       updatedExercises[index][field] -= 1;
       setExercises(updatedExercises);
 
+      // Mettre à jour les données dans Firebase
       const userRef = ref(database, 'users/' + userId);
       update(userRef, {
         ['programs/upperBody/exercises/' + index + '/' + field]: updatedExercises[index][field],
       });
     }
+  };
+
+  // Fonction pour ajouter un nouvel exercice
+  const addExercise = () => {
+    const newExercise = {
+      name: '',
+      repetitions: 0,
+      weight: 0,
+      goalWeight: 0,
+      duration: 0,
+    };
+    const updatedExercises = [...exercises, newExercise];
+    setExercises(updatedExercises);
+
+    // Mettre à jour Firebase avec le nouvel exercice
+    const userRef = ref(database, 'users/' + userId);
+    update(userRef, {
+      'programs/upperBody/exercises': updatedExercises,
+    });
+  };
+
+  // Fonction pour supprimer un exercice
+  const removeExercise = (index) => {
+    const updatedExercises = exercises.filter((_, i) => i !== index);
+    setExercises(updatedExercises);
+
+    // Mettre à jour Firebase après suppression de l'exercice
+    const userRef = ref(database, 'users/' + userId);
+    update(userRef, {
+      'programs/upperBody/exercises': updatedExercises,
+    });
   };
 
   return (
@@ -75,6 +110,7 @@ const UpperBodyPage = () => {
                 <th>Poids (kg)</th>
                 <th>Objectif Poids (kg)</th>
                 <th>Durée (sec)</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -128,10 +164,14 @@ const UpperBodyPage = () => {
                     />
                     <button onClick={() => handleIncrement(index, 'duration')}>+</button>
                   </td>
+                  <td>
+                    <button onClick={() => removeExercise(index)}>Supprimer</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          <button onClick={addExercise}>Ajouter un exercice</button>
         </div>
       ) : (
         <p>Chargement des exercices...</p>
