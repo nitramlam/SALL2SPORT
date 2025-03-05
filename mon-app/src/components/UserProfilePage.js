@@ -1,40 +1,37 @@
-// UserProfilePage.js
-
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getDatabase, ref, get } from "firebase/database"; // Assure-toi d'importer ces éléments
-import { database } from "../firebase"; // Assure-toi que le chemin est correct
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { ref, get } from 'firebase/database';
+import { database } from '../firebase';  // Assure-toi que le chemin vers le fichier firebase.js est correct
 
 const UserProfilePage = () => {
-  const { username } = useParams(); // Obtient le paramètre de l'URL
-  const [userData, setUserData] = useState(null);
+  const { userId } = useParams();  // Récupérer l'ID de l'utilisateur depuis l'URL
+  const [userName, setUserName] = useState(null);  // Variable d'état pour stocker le nom de l'utilisateur
 
+  // Effectuer la récupération des données lorsque l'ID de l'utilisateur change
   useEffect(() => {
-    // Cette fonction récupère les données spécifiques à un utilisateur depuis Firebase
     const fetchUserData = async () => {
-      const dbRef = ref(database, `users/${username}`);
-      const snapshot = await get(dbRef);
-      if (snapshot.exists()) {
-        setUserData(snapshot.val());
-      } else {
-        console.log("No data available");
+      try {
+        const userRef = ref(database, 'users/' + userId);  // Référence à l'utilisateur dans Firebase
+        const snapshot = await get(userRef);  // Récupérer les données de l'utilisateur
+        if (snapshot.exists()) {
+          setUserName(snapshot.val().name);  // Stocker le nom de l'utilisateur dans l'état
+        } else {
+          console.log('Aucun utilisateur trouvé');
+        }
+      } catch (error) {
+        console.error('Erreur de récupération des données utilisateur:', error);
       }
     };
 
     fetchUserData();
-  }, [username]);
+  }, [userId]);  // Déclenche la récupération des données lorsque l'ID de l'utilisateur change
 
   return (
     <div>
-      <h1>Profile de {username}</h1>
-      {userData ? (
-        <div>
-          <p>Nom: {userData.name}</p>
-          <p>Email: {userData.email}</p>
-          {/* Affiche d'autres informations de l'utilisateur */}
-        </div>
+      {userName ? (
+        <h1>Bonjour, {userName}!</h1>  
       ) : (
-        <p>Chargement...</p>
+        <p>Chargement...</p> 
       )}
     </div>
   );
