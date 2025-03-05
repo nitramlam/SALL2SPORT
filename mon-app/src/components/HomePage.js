@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getDatabase, ref, get, set } from "firebase/database";
+import { getDatabase, ref, get, set, remove } from "firebase/database";
 import { database } from "../firebase";
 
 const HomePage = () => {
@@ -24,6 +24,7 @@ const HomePage = () => {
         setUsers(usersArray);
       } else {
         console.log("No data available");
+        setUsers([]); // Assurer que users est un tableau vide si aucune donnée n'est trouvée
       }
     };
 
@@ -47,10 +48,10 @@ const HomePage = () => {
     const dbRef = ref(database, "users/");
     const snapshot = await get(dbRef);
     const usersData = snapshot.val();
-    const usersArray = Object.keys(usersData).map((key) => ({
+    const usersArray = usersData ? Object.keys(usersData).map((key) => ({
       id: key,
       name: usersData[key].name || "Nom non défini",
-    }));
+    })) : [];
     setUsers(usersArray);
   };
 
@@ -61,6 +62,22 @@ const HomePage = () => {
       ...newUser,
       [name]: value,
     });
+  };
+
+  // Fonction pour supprimer un utilisateur
+  const handleDeleteUser = async (id) => {
+    const userRef = ref(database, "users/" + id);
+    await remove(userRef);
+
+    // Mettre à jour la liste des utilisateurs après suppression
+    const dbRef = ref(database, "users/");
+    const snapshot = await get(dbRef);
+    const usersData = snapshot.val();
+    const usersArray = usersData ? Object.keys(usersData).map((key) => ({
+      id: key,
+      name: usersData[key].name || "Nom non défini",
+    })) : [];
+    setUsers(usersArray);
   };
 
   return (
@@ -80,13 +97,19 @@ const HomePage = () => {
         <button type="submit">Ajouter un utilisateur</button>
       </form>
 
-      <ul>
-        {users.map((user) => (
-          <li key={user.id}>
-            <Link to={`/user/${user.id}`}>{user.name}</Link>
-          </li>
-        ))}
-      </ul>
+      {users.length === 0 ? (
+        <p>Aucun utilisateur disponible.</p>
+      ) : (
+        <ul>
+          {users.map((user) => (
+            <li key={user.id}>
+              <Link to={`/user/${user.id}`}>{user.name}</Link>
+              {/* Bouton pour supprimer l'utilisateur */}
+              <button onClick={() => handleDeleteUser(user.id)}>Supprimer</button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
